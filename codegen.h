@@ -16,10 +16,6 @@ public:
 
 public:
   CodeGenerator();
-  // visit - visits AST
-  void visit(const AST &ast) override;
-  // visit - visits ExprAST
-  void visit(const ExprAST &ast) override;
   // visit - generates codes for NumberAST
   void visit(const NumberExprAST &ast) override;
   // visit - generates codes for VariableExprAST

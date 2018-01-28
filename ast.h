@@ -98,10 +98,6 @@ public:
 class Visitor {
 public:
   virtual ~Visitor() {}
-  // visit - visits AST
-  virtual void visit(const AST &ast)             = 0;
-  // visit - visits ExprAST
-  virtual void visit(const ExprAST &ast)         = 0;
   // visit - visits NumberExprAST
   virtual void visit(const NumberExprAST &ast)   = 0;
   // visit - visits VariableExprAST

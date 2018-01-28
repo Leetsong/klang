@@ -10,12 +10,6 @@ CodeGenerator::CodeGenerator()
     ir_builder(the_context),
     named_values() {}
 
-// visit - visits AST
-void CodeGenerator::visit(const AST &ast) {}
-
-// visit - visits ExprAST
-void CodeGenerator::visit(const ExprAST &ast) {}
-
 // visit - generates codes for NumberAST
 void CodeGenerator::visit(const NumberExprAST &ast) {
   CODEGEN_RETURN_V(llvm::ConstantFP::get(the_context, llvm::APFloat(ast.val)));
@@ -35,13 +29,13 @@ void CodeGenerator::visit(const VariableExprAST &ast) {
 // visit - generates codes for BinaryExprAST
 void CodeGenerator::visit(const BinaryExprAST &ast) {
   // generates codes for lhs and rhs
-  visit(*ast.lhs);
+  ast.lhs->accept(*this);
   llvm::Value *l = get_ret_v();
   if (!l) {
     CODEGEN_RETURN_N();
   }
 
-  visit(*ast.rhs);
+  ast.rhs->accept(*this);
   llvm::Value *r = get_ret_v();
   if (!r) {
     CODEGEN_RETURN_N();
@@ -81,7 +75,7 @@ void CodeGenerator::visit(const CallExprAST &ast) {
   // generates codes for each arg
   std::vector<llvm::Value *> args;
   for (unsigned i = 0, e = static_cast<unsigned>(ast.args.size()); i < e; i ++) {
-    visit(*ast.args[i]);
+    ast.args[i]->accept(*this);
     auto v = get_ret_v();
     if (!v) {
       CODEGEN_RETURN_N();
@@ -131,7 +125,7 @@ void CodeGenerator::visit(const FunctionAST &ast) {
       }
     }
   } else { // f has not already been declared (via "extern") or defined (via "def")
-    visit(*ast.proto); // we declare it
+    ast.proto->accept(*this); // we declare it
     if (!(f = get_ret_f())) {
       CODEGEN_RETURN_N();
     }
@@ -149,7 +143,7 @@ void CodeGenerator::visit(const FunctionAST &ast) {
     named_values[arg.getName()] = &arg;
   }
 
-  visit(*ast.body);
+  ast.body->accept(*this);
   if (llvm::Value *ret_value = get_ret_v()) {
     // finish off the function
     ir_builder.CreateRet(ret_value);
